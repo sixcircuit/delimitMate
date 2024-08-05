@@ -153,12 +153,22 @@ endfunction " }}} IsSpaceExpansion()
 function! s:is_empty_matchpair() "{{{
   " get char before the cursor.
   let open = s:get_char(-1)
+  let spaces = 0
+  if open == " "
+    let spaces = 1
+    let open = s:get_char(-2)
+  endif
+
   let idx = index(s:get('left_delims'), open)
   if idx == -1
     return 0
   endif
   let close = get(s:get('right_delims'), idx, '')
-  return close ==# s:get_char(0)
+  if spaces == 1
+    return s:get_char(0) == " " && close ==# s:get_char(1)
+  else
+    return close ==# s:get_char(0)
+  endif
 endfunction "}}}
 
 function! s:is_empty_quotes() "{{{
@@ -289,6 +299,7 @@ function! delimitMate#WithinEmptyPair() "{{{
   if col('.') == 1
     return 0
   endif
+
   " get char before the cursor.
   let char1 = s:get_char(-1)
   " get char under the cursor.
